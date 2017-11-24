@@ -11,9 +11,9 @@ fn innerprod<I, J>(subimage: &I, costmpl: &J) -> f64
   let mut result = 0.0_f64;
   for y in 0..7{
     for x in 0..7 {
-      result += (
+      result += 
         subimage.get_pixel(x, y).to_luma().data[0] as f64 *
-        costmpl.get_pixel(x, y).to_luma().data[0]);
+        costmpl.get_pixel(x, y).to_luma().data[0];
     }
   }
   result
@@ -22,7 +22,6 @@ fn innerprod<I, J>(subimage: &I, costmpl: &J) -> f64
 fn main() {
   let mut img = image::open("map_gray_crop.png").unwrap().to_luma();
   let (dimx, dimy) = img.dimensions();
-  let mut dctcoef :image::ImageBuffer<Luma<u8>, _> = image::ImageBuffer::new(dimx, dimy);
   let (repx, repy) = (dimx/8, dimy/8);
 
   let mut costmpl : Vec<Vec<image::ImageBuffer<Luma<f64>, Vec<f64>>>> = Vec::new();
@@ -39,6 +38,8 @@ fn main() {
         }));
 
       /*
+       * To dump dct base vectors
+       *
       let tr = image::ImageBuffer::from_fn(8, 8, |x, y| {
         image::Luma([(costmpl_u[u].get_pixel(x, y).to_luma().data[0] * 128_f64 + 127_f64) as u8])
       });
@@ -49,6 +50,7 @@ fn main() {
   }
 
   let costmpl = costmpl;
+  let mut dctcoef :image::ImageBuffer<Luma<u8>, _> = image::ImageBuffer::new(dimx, dimy);
 
   for blocky in 0..repy {
     for blockx in 0..repx{
