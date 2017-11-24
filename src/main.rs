@@ -9,8 +9,8 @@ fn innerprod<I, J>(subimage: &I, costmpl: &J) -> f64
         J: GenericImage<Pixel = Luma<f64>>
   {
   let mut result = 0.0_f64;
-  for y in 0..7{
-    for x in 0..7 {
+  for y in 0..8{
+    for x in 0..8 {
       result += 
         subimage.get_pixel(x, y).to_luma().data[0] as f64 *
         costmpl.get_pixel(x, y).to_luma().data[0];
