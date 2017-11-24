@@ -50,37 +50,35 @@ fn main() {
   }
 
   let costmpl = costmpl;
-  let mut dctcoef :image::ImageBuffer<Luma<u8>, _> = image::ImageBuffer::new(dimx, dimy);
+  let mut dctcoef :image::ImageBuffer<Luma<f64>, _> = image::ImageBuffer::new(dimx, dimy);
 
   for blocky in 0..repy {
     for blockx in 0..repx{
       let subimage = img.sub_image(blockx*8, blocky*8, 8, 8);
       for v in 0usize..8 {
         for u in 0usize..8 {
-          let cucv = if u == 0 && v == 0 {
+          let cucv = if u == 0usize && v == 0usize {
             1.0_f64 / 2.0_f64.sqrt()
           }else{
             1.0_f64
           };
           dctcoef.put_pixel(
             blockx * 8 + u as u32, blocky * 8 + v as u32, 
-            image::Luma([(0.25_f64 * cucv * innerprod(&subimage, &costmpl[v][u])) as u8])
+            image::Luma([(0.25_f64 * cucv * innerprod(&subimage, &costmpl[v][u])) as f64])
             );
         }
       }
     }
   }
 
-  println!("save dctcoef.png : {:?}", dctcoef.save("dctcoef.png"));
+  // println!("save dctcoef.png : {:?}", dctcoef.save("dctcoef.png"));
 
-  let mut sums = [[0u64; 8]; 8];
-  for blocky in 0..repy {
-    for blockx in 0..repx{
-      for v in 0usize..8 {
-        for u in 0usize..8 {
-          sums[v][u] += dctcoef.get_pixel(blockx * 8 + u as u32, blocky * 8 + v as u32).data[0] as u64;
-        }
-      }
+  let mut sums = [[0.0f64; 8]; 8];
+  for y in 0..dimy {
+    for x in 0..dimx{
+      let v = (y % 8) as usize;
+      let u = (x % 8) as usize;
+      sums[v][u] += dctcoef.get_pixel(x, y).data[0] as f64;
     }
   }
   let sums = sums;
@@ -114,14 +112,16 @@ fn main() {
   }
 
   let mut sqerrors = [[0.0f64; 8]; 8];
-  for blocky in 0..repy {
-    for blockx in 0..repx{
-      for v in 0usize..8 {
-        for u in 0usize..8 {
-          sqerrors[v][u] +=
-            (dctcoef.get_pixel(blockx * 8 + u as u32, blocky * 8 + v as u32).data[0] as f64
-            - means[v][u]).powf(2.0f64);
-        }
+  for y in 0..dimy {
+    for x in 0..dimx{
+      let v = (y % 8) as usize;
+      let u = (x % 8) as usize;
+      let coef = dctcoef.get_pixel(x, y).data[0] as f64;
+      let mean = means[v][u];
+
+      sqerrors[v][u] += (coef - mean).powf(2.0f64);
+      if v ==0 && u == 0{
+        println!("({} - {})^2 = {}",  coef, mean, (coef-mean).powf(2.0f64));
       }
     }
   }
@@ -152,6 +152,24 @@ fn main() {
   for v in 0usize..8 {
     for u in 0usize..8 {
       print!("{:.2}", variances[v][u]);
+      if u != 7 {
+        print!(", ");
+      }
+    }
+    println!("");
+  }
+
+  let mut stderrs = [[0.0f64; 8]; 8];
+  for v in 0usize..8 {
+    for u in 0usize..8 {
+      stderrs[v][u] = variances[v][u].sqrt();
+    }
+  }
+
+  println!("stderrs:");
+  for v in 0usize..8 {
+    for u in 0usize..8 {
+      print!("{:.2}", stderrs[v][u]);
       if u != 7 {
         print!(", ");
       }
