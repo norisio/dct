@@ -1,0 +1,7 @@
+[package]
+name = "dct"
+version = "0.1.0"
+authors = ["Naoya Sakabe <k.exa.apostrophe@gmail.com>"]
+
+[dependencies]
+image = "*"
