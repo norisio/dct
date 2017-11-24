@@ -71,5 +71,92 @@ fn main() {
     }
   }
 
-  println!("{:?}", dctcoef.save("dctcoef.png"));
+  println!("save dctcoef.png : {:?}", dctcoef.save("dctcoef.png"));
+
+  let mut sums = [[0u64; 8]; 8];
+  for blocky in 0..repy {
+    for blockx in 0..repx{
+      for v in 0usize..8 {
+        for u in 0usize..8 {
+          sums[v][u] += dctcoef.get_pixel(blockx * 8 + u as u32, blocky * 8 + v as u32).data[0] as u64;
+        }
+      }
+    }
+  }
+  let sums = sums;
+  println!("sums:");
+  for v in 0usize..8 {
+    for u in 0usize..8 {
+      print!("{:.2}", sums[v][u]);
+      if u != 7 {
+        print!(", ");
+      }
+    }
+    println!("");
+  }
+  let mut means = [[0.0f64; 8]; 8];
+  let denominator = (repx * repy) as f64;
+  for v in 0usize..8 {
+    for u in 0usize..8 {
+      means[v][u] = sums[v][u] as f64 / denominator;
+    }
+  }
+  let means = means;
+  println!("means:");
+  for v in 0usize..8 {
+    for u in 0usize..8 {
+      print!("{:.2}", means[v][u]);
+      if u != 7 {
+        print!(", ");
+      }
+    }
+    println!("");
+  }
+
+  let mut sqerrors = [[0.0f64; 8]; 8];
+  for blocky in 0..repy {
+    for blockx in 0..repx{
+      for v in 0usize..8 {
+        for u in 0usize..8 {
+          sqerrors[v][u] +=
+            (dctcoef.get_pixel(blockx * 8 + u as u32, blocky * 8 + v as u32).data[0] as f64
+            - means[v][u]).powf(2.0f64);
+        }
+      }
+    }
+  }
+  let sqerrors = sqerrors;
+
+  println!("sqerrors:");
+  for v in 0usize..8 {
+    for u in 0usize..8 {
+      print!("{:.2}", sqerrors[v][u]);
+      if u != 7 {
+        print!(", ");
+      }
+    }
+    println!("");
+  }
+
+
+  let mut variances = [[0.0f64; 8]; 8];
+  for v in 0usize..8 {
+    for u in 0usize..8 {
+      variances[v][u] = sqerrors[v][u] / denominator;
+    }
+  }
+  let variances = variances;
+
+
+  println!("variances:");
+  for v in 0usize..8 {
+    for u in 0usize..8 {
+      print!("{:.2}", variances[v][u]);
+      if u != 7 {
+        print!(", ");
+      }
+    }
+    println!("");
+  }
 }
+
